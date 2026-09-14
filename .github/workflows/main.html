@@ -1,0 +1,260 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DSA Interactive Roadmap</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f6f7fb;color:#172033}
+header{padding:24px 28px;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:5}
+h1{margin:0 0 6px;font-size:28px}.sub{color:#667085}
+#app{padding:28px;max-width:1250px;margin:auto}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+input{padding:11px 14px;border:1px solid #d0d5dd;border-radius:10px;width:300px;font-size:15px}
+button{border:1px solid #d0d5dd;background:white;padding:10px 14px;border-radius:9px;cursor:pointer}
+button:hover{background:#f0f2f5}.tree{display:grid;gap:12px}.topic{background:#fff;border:1px solid #e4e7ec;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px #00000008}
+.row{display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer}.arrow{width:20px;font-size:18px}
+.name{font-weight:750;flex:1}.count{color:#667085;font-size:14px}.badge{padding:4px 8px;border-radius:999px;background:#eef2ff;color:#3446a3;font-size:12px}
+.children{display:none;padding:0 18px 18px 50px}.topic.open>.children{display:grid;gap:9px}
+.subtopic{border-left:2px solid #d0d5dd;padding-left:14px;background:#fafafa;border-radius:8px}
+.subrow{display:flex;gap:10px;align-items:center;padding:11px;cursor:pointer}.subchildren{display:none;padding:0 12px 12px 36px}.subtopic.open .subchildren{display:grid;gap:7px}
+.method{padding:10px 12px;background:#fff;border:1px solid #eaecf0;border-radius:8px;cursor:pointer}
+.method:hover{border-color:#98a2b3}
+.detail{margin-top:22px;background:#fff;border:1px solid #e4e7ec;border-radius:14px;padding:22px;display:none}.detail h2{margin-top:0}
+.problem{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #eee}.problem:last-child{border:0}
+.problem input{width:auto}.num{width:30px;color:#667085}.pname{flex:1}.pname a{color:#3157c9;text-decoration:none;font-weight:650}.pname a:hover{text-decoration:underline}.diff{font-size:12px;padding:3px 7px;border-radius:7px;background:#f2f4f7}
+.progress{height:8px;background:#eaecf0;border-radius:99px;overflow:hidden;margin-top:8px}.bar{height:100%;width:0;background:#4f46e5}
+.note{font-size:13px;color:#667085;margin-top:15px}
+</style>
+</head>
+<body>
+<header><h1>DSA Interactive Roadmap</h1><div class="sub">Topic → Subtopic → Method/Pattern → Problems</div></header>
+<div id="app">
+<div class="toolbar"><input id="search" placeholder="Search topic, method or problem..."><button onclick="expandAll()">Expand all</button><button onclick="collapseAll()">Collapse all</button><button onclick="resetProgress()">Reset progress</button></div>
+<div id="tree" class="tree"></div>
+<div id="detail" class="detail"></div>
+</div>
+<script>
+const data=[
+["01","Arrays",[
+["Fundamentals",["Traversal","Insertion / Deletion","Frequency Counting"],["Two Sum","Best Time to Buy and Sell Stock","Contains Duplicate"]],
+["Two Pointer",["Opposite Ends","Same Direction","Fast / Slow"],["Two Sum II","3Sum","Container With Most Water"]],
+["Sliding Window",["Fixed Size","Variable Size","Frequency Map","At Most K / Exactly K"],["Maximum Average Subarray I","Longest Substring Without Repeating Characters","Minimum Size Subarray Sum","Permutation in String"]],
+["Prefix Sum",["1D Prefix Sum","2D Prefix Sum","Difference Array"],["Range Sum Query","Subarray Sum Equals K"]],
+["Kadane / Subarray",["Maximum Subarray","Circular Subarray"],["Maximum Subarray","Maximum Sum Circular Subarray"]],
+["Matrix",["Traversal","Spiral","Rotation","Transpose"],["Spiral Matrix","Rotate Image","Set Matrix Zeroes"]]
+]],
+["02","Strings",[
+["Basics",["Frequency","Palindrome","Character Processing"],["Valid Anagram","Valid Palindrome"]],
+["Two Pointer",["Palindrome Check","Reverse"],["Valid Palindrome II"]],
+["Sliding Window",["Unique Characters","Frequency Window"],["Longest Substring Without Repeating Characters","Minimum Window Substring"]],
+["String Matching",["KMP","Rabin-Karp"],["Find the Index of the First Occurrence"]]
+]],
+["03","Linked List",[
+["Basics",["Traversal","Insertion","Deletion"],["Reverse Linked List","Merge Two Sorted Lists"]],
+["Fast & Slow Pointer",["Middle Node","Cycle Detection"],["Middle of the Linked List","Linked List Cycle"]],
+["Two Pointer",["Intersection","Nth Node"],["Intersection of Two Linked Lists","Remove Nth Node From End"]],
+["Advanced",["Merge","Reordering"],["Palindrome Linked List","Reorder List"]]
+]],
+["04","Stack",[
+["Basics",["Push / Pop","Expression Handling"],["Valid Parentheses","Min Stack"]],
+["Monotonic Stack",["Next Greater","Previous Greater","Next Smaller"],["Daily Temperatures","Next Greater Element"]],
+["Design",["Min/Max Stack","Queue Using Stack"],["Min Stack","Implement Queue using Stacks"]]
+]],
+["05","Queue / Deque",[
+["Basics",["FIFO","Circular Queue"],["Number of Recent Calls"]],
+["Monotonic Queue",["Sliding Window Maximum"],["Sliding Window Maximum"]]
+]],
+["06","Hashing",[
+["Hash Map",["Frequency Map","Lookup"],["Two Sum","Group Anagrams"]],
+["Hash Set",["Duplicate Detection","Membership"],["Contains Duplicate","Longest Consecutive Sequence"]]
+]],
+["07","Binary Search",[
+["Classic",["Exact Search","First/Last Position"],["Binary Search","Find First and Last Position"]],
+["Answer Search",["Minimum Feasible","Maximum Feasible"],["Koko Eating Bananas","Capacity To Ship Packages"]],
+["Rotated Array",["Pivot","Sorted Half"],["Search in Rotated Sorted Array","Find Minimum in Rotated Sorted Array"]]
+]],
+["08","Recursion",[
+["Basics",["Base Case","Recursive Tree"],["Fibonacci Number","Power of Two"]],
+["Divide & Conquer",["Split / Combine"],["Merge Sort","Quick Sort"]]
+]],
+["09","Backtracking",[
+["Subsets",["Choose / Skip"],["Subsets","Subsets II"]],
+["Permutations",["Swap / Used"],["Permutations","Letter Case Permutation"]],
+["Combination",["Target / Choice"],["Combination Sum","Combination Sum II"]],
+["Grid Search",["DFS + Backtrack"],["Word Search","N-Queens"]]
+]],
+["10","Trees",[
+["Traversal",["DFS","BFS","Level Order"],["Binary Tree Inorder Traversal","Maximum Depth of Binary Tree","Binary Tree Level Order Traversal"]],
+["BST",["Search","Insert","Validate"],["Search in a Binary Search Tree","Validate Binary Search Tree"]],
+["Tree Patterns",["Lowest Common Ancestor","Diameter","Path Sum"],["Lowest Common Ancestor","Diameter of Binary Tree","Path Sum"]]
+]],
+["11","Heap / Priority Queue",[
+["Basics",["Min Heap","Max Heap"],["Kth Largest Element","Last Stone Weight"]],
+["Top K",["Frequency","Closest"],["Top K Frequent Elements","K Closest Points to Origin"]],
+["Two Heaps",["Median"],["Find Median from Data Stream"]]
+]],
+["12","Graphs",[
+["Traversal",["BFS","DFS"],["Number of Islands","Clone Graph"]],
+["Shortest Path",["BFS","Dijkstra","Bellman-Ford"],["Rotting Oranges","Network Delay Time"]],
+["Topological Sort",["Kahn BFS","DFS"],["Course Schedule","Course Schedule II"]],
+["Union Find",["DSU","Path Compression"],["Number of Connected Components","Redundant Connection"]]
+]],
+["13","Greedy",[
+["Intervals",["Sort by Start","Sort by End"],["Merge Intervals","Non-overlapping Intervals"]],
+["Choice",["Local Optimal Choice"],["Jump Game","Gas Station"]]
+]],
+["14","Dynamic Programming",[
+["1D DP",["State + Transition","Rolling State"],["Climbing Stairs","House Robber","Coin Change"]],
+["2D DP",["Grid DP","String DP"],["Unique Paths","Longest Common Subsequence"]],
+["Knapsack",["0/1","Unbounded"],["Partition Equal Subset Sum","Coin Change"]],
+["Subsequence",["LIS","LCS"],["Longest Increasing Subsequence","Longest Common Subsequence"]]
+]],
+["15","Graphs Advanced",[
+["MST",["Kruskal","Prim"],["Min Cost to Connect All Points"]],
+["Advanced Shortest Path",["Floyd-Warshall"],["Cheapest Flights Within K Stops"]],
+["Strong Connectivity",["Kosaraju","Tarjan"],["Strongly Connected Components"]]
+]]
+];
+
+
+const links={
+"Two Sum":"https://leetcode.com/problems/two-sum/",
+"Best Time to Buy and Sell Stock":"https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+"Contains Duplicate":"https://leetcode.com/problems/contains-duplicate/",
+"Two Sum II":"https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/",
+"3Sum":"https://leetcode.com/problems/3sum/",
+"Container With Most Water":"https://leetcode.com/problems/container-with-most-water/",
+"Maximum Average Subarray I":"https://leetcode.com/problems/maximum-average-subarray-i/",
+"Longest Substring Without Repeating Characters":"https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+"Minimum Size Subarray Sum":"https://leetcode.com/problems/minimum-size-subarray-sum/",
+"Permutation in String":"https://leetcode.com/problems/permutation-in-string/",
+"Range Sum Query":"https://leetcode.com/problems/range-sum-query-immutable/",
+"Subarray Sum Equals K":"https://leetcode.com/problems/subarray-sum-equals-k/",
+"Maximum Subarray":"https://leetcode.com/problems/maximum-subarray/",
+"Maximum Sum Circular Subarray":"https://leetcode.com/problems/maximum-sum-circular-subarray/",
+"Spiral Matrix":"https://leetcode.com/problems/spiral-matrix/",
+"Rotate Image":"https://leetcode.com/problems/rotate-image/",
+"Set Matrix Zeroes":"https://leetcode.com/problems/set-matrix-zeroes/",
+"Valid Anagram":"https://leetcode.com/problems/valid-anagram/",
+"Valid Palindrome":"https://leetcode.com/problems/valid-palindrome/",
+"Valid Palindrome II":"https://leetcode.com/problems/valid-palindrome-ii/",
+"Minimum Window Substring":"https://leetcode.com/problems/minimum-window-substring/",
+"Find the Index of the First Occurrence":"https://leetcode.com/problems/find-the-index-of-the-first-occurrence-in-a-string/",
+"Reverse Linked List":"https://leetcode.com/problems/reverse-linked-list/",
+"Merge Two Sorted Lists":"https://leetcode.com/problems/merge-two-sorted-lists/",
+"Middle of the Linked List":"https://leetcode.com/problems/middle-of-the-linked-list/",
+"Linked List Cycle":"https://leetcode.com/problems/linked-list-cycle/",
+"Intersection of Two Linked Lists":"https://leetcode.com/problems/intersection-of-two-linked-lists/",
+"Remove Nth Node From End":"https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
+"Palindrome Linked List":"https://leetcode.com/problems/palindrome-linked-list/",
+"Reorder List":"https://leetcode.com/problems/reorder-list/",
+"Valid Parentheses":"https://leetcode.com/problems/valid-parentheses/",
+"Min Stack":"https://leetcode.com/problems/min-stack/",
+"Daily Temperatures":"https://leetcode.com/problems/daily-temperatures/",
+"Next Greater Element":"https://leetcode.com/problems/next-greater-element-i/",
+"Implement Queue using Stacks":"https://leetcode.com/problems/implement-queue-using-stacks/",
+"Number of Recent Calls":"https://leetcode.com/problems/number-of-recent-calls/",
+"Sliding Window Maximum":"https://leetcode.com/problems/sliding-window-maximum/",
+"Group Anagrams":"https://leetcode.com/problems/group-anagrams/",
+"Longest Consecutive Sequence":"https://leetcode.com/problems/longest-consecutive-sequence/",
+"Binary Search":"https://leetcode.com/problems/binary-search/",
+"Find First and Last Position":"https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/",
+"Koko Eating Bananas":"https://leetcode.com/problems/koko-eating-bananas/",
+"Capacity To Ship Packages":"https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/",
+"Search in Rotated Sorted Array":"https://leetcode.com/problems/search-in-rotated-sorted-array/",
+"Find Minimum in Rotated Sorted Array":"https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/",
+"Fibonacci Number":"https://leetcode.com/problems/fibonacci-number/",
+"Power of Two":"https://leetcode.com/problems/power-of-two/",
+"Merge Sort":"https://www.geeksforgeeks.org/merge-sort/",
+"Quick Sort":"https://www.geeksforgeeks.org/quick-sort-algorithm/",
+"Subsets":"https://leetcode.com/problems/subsets/",
+"Subsets II":"https://leetcode.com/problems/subsets-ii/",
+"Permutations":"https://leetcode.com/problems/permutations/",
+"Letter Case Permutation":"https://leetcode.com/problems/letter-case-permutation/",
+"Combination Sum":"https://leetcode.com/problems/combination-sum/",
+"Combination Sum II":"https://leetcode.com/problems/combination-sum-ii/",
+"Word Search":"https://leetcode.com/problems/word-search/",
+"N-Queens":"https://leetcode.com/problems/n-queens/",
+"Binary Tree Inorder Traversal":"https://leetcode.com/problems/binary-tree-inorder-traversal/",
+"Maximum Depth of Binary Tree":"https://leetcode.com/problems/maximum-depth-of-binary-tree/",
+"Binary Tree Level Order Traversal":"https://leetcode.com/problems/binary-tree-level-order-traversal/",
+"Search in a Binary Search Tree":"https://leetcode.com/problems/search-in-a-binary-search-tree/",
+"Validate Binary Search Tree":"https://leetcode.com/problems/validate-binary-search-tree/",
+"Lowest Common Ancestor":"https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/",
+"Diameter of Binary Tree":"https://leetcode.com/problems/diameter-of-binary-tree/",
+"Path Sum":"https://leetcode.com/problems/path-sum/",
+"Kth Largest Element":"https://leetcode.com/problems/kth-largest-element-in-an-array/",
+"Last Stone Weight":"https://leetcode.com/problems/last-stone-weight/",
+"Top K Frequent Elements":"https://leetcode.com/problems/top-k-frequent-elements/",
+"K Closest Points to Origin":"https://leetcode.com/problems/k-closest-points-to-origin/",
+"Find Median from Data Stream":"https://leetcode.com/problems/find-median-from-data-stream/",
+"Number of Islands":"https://leetcode.com/problems/number-of-islands/",
+"Clone Graph":"https://leetcode.com/problems/clone-graph/",
+"Rotting Oranges":"https://leetcode.com/problems/rotting-oranges/",
+"Network Delay Time":"https://leetcode.com/problems/network-delay-time/",
+"Course Schedule":"https://leetcode.com/problems/course-schedule/",
+"Course Schedule II":"https://leetcode.com/problems/course-schedule-ii/",
+"Number of Connected Components":"https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/",
+"Redundant Connection":"https://leetcode.com/problems/redundant-connection/",
+"Merge Intervals":"https://leetcode.com/problems/merge-intervals/",
+"Non-overlapping Intervals":"https://leetcode.com/problems/non-overlapping-intervals/",
+"Jump Game":"https://leetcode.com/problems/jump-game/",
+"Gas Station":"https://leetcode.com/problems/gas-station/",
+"Climbing Stairs":"https://leetcode.com/problems/climbing-stairs/",
+"House Robber":"https://leetcode.com/problems/house-robber/",
+"Coin Change":"https://leetcode.com/problems/coin-change/",
+"Unique Paths":"https://leetcode.com/problems/unique-paths/",
+"Longest Common Subsequence":"https://leetcode.com/problems/longest-common-subsequence/",
+"Partition Equal Subset Sum":"https://leetcode.com/problems/partition-equal-subset-sum/",
+"Longest Increasing Subsequence":"https://leetcode.com/problems/longest-increasing-subsequence/",
+"Min Cost to Connect All Points":"https://leetcode.com/problems/min-cost-to-connect-all-points/",
+"Cheapest Flights Within K Stops":"https://leetcode.com/problems/cheapest-flights-within-k-stops/"
+};
+
+const key="dsa-roadmap-progress-v1";
+let progress=JSON.parse(localStorage.getItem(key)||"{}");
+
+function topicHTML(t){
+ let [id,name,subs]=t;
+ return `<section class="topic" data-search="${name.toLowerCase()}">
+ <div class="row" onclick="toggle(this.parentElement)"><span class="arrow">▶</span><span class="name">${id}. ${name}</span><span class="count">${countProblems(subs)} problems</span><span class="badge">${subs.length} subtopics</span></div>
+ <div class="children">${subs.map((s,i)=>subHTML(name,s,i)).join("")}</div></section>`;
+}
+function subHTML(topic,s,i){
+ let [name,methods,problems]=s;
+ return `<div class="subtopic" data-search="${(topic+" "+name+" "+methods.join(" ")+" "+problems.join(" ")).toLowerCase()}">
+ <div class="subrow" onclick="toggle(this.parentElement)"><span class="arrow">▶</span><b>${name}</b><span class="count">${problems.length} problems</span></div>
+ <div class="subchildren">
+   <div class="note"><b>Methods / patterns:</b></div>
+   ${methods.map(m=>`<div class="method" onclick='showDetail(${JSON.stringify(topic)},${JSON.stringify(name)},${JSON.stringify(m)},${JSON.stringify(problems)})'>${m}</div>`).join("")}
+ </div></div>`;
+}
+function countProblems(subs){return subs.reduce((a,s)=>a+s[2].length,0)}
+function toggle(el){el.classList.toggle("open");el.querySelector(".arrow").textContent=el.classList.contains("open")?"▼":"▶"}
+function render(){document.getElementById("tree").innerHTML=data.map(topicHTML).join("")}
+function showDetail(topic,sub,method,problems){
+ let d=document.getElementById("detail"); d.style.display="block";
+ d.innerHTML=`<h2>${topic} → ${sub} → ${method}</h2><div class="note">${problems.length} problems covered in this subtopic.</div>
+ <div class="progress"><div class="bar" style="width:${problems.filter((_,i)=>progress[topic+"|"+sub+"|"+i]).length/problems.length*100}%"></div></div>
+ ${problems.map((p,i)=>{let k=topic+"|"+sub+"|"+i;let u=links[p];let name=u?`<a href="${u}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${p} ↗</a>`:`${p}`;return `<div class="problem"><input type="checkbox" ${progress[k]?"checked":""} onchange="setProgress('${k}',this.checked)"><span class="num">${i+1}.</span><span class="pname">${name}</span><span class="diff">${i%3===0?"Easy":i%3===1?"Medium":"Hard"}</span></div>`}).join("")}
+ <div class="note">Problem names here are a starter roadmap. You can edit this single HTML file later to add your own full list.</div>`;
+ d.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function setProgress(k,v){if(v)progress[k]=1;else delete progress[k];localStorage.setItem(key,JSON.stringify(progress));}
+function expandAll(){document.querySelectorAll(".topic,.subtopic").forEach(x=>{x.classList.add("open");x.querySelector(".arrow").textContent="▼"})}
+function collapseAll(){document.querySelectorAll(".topic,.subtopic").forEach(x=>{x.classList.remove("open");x.querySelector(".arrow").textContent="▶"})}
+function resetProgress(){progress={};localStorage.removeItem(key);location.reload()}
+document.getElementById("search").addEventListener("input",e=>{
+ let q=e.target.value.toLowerCase().trim();
+ document.querySelectorAll(".topic").forEach(t=>{
+   let hit=!q||t.dataset.search.includes(q)||[...t.querySelectorAll(".subtopic")].some(s=>s.dataset.search.includes(q));
+   t.style.display=hit?"block":"none";
+   if(q){t.classList.add("open");t.querySelector(".arrow").textContent="▼";
+     t.querySelectorAll(".subtopic").forEach(s=>{let sh=s.dataset.search.includes(q);s.style.display=sh?"block":"none";if(sh){s.classList.add("open");s.querySelector(".arrow").textContent="▼"}})
+   } else t.querySelectorAll(".subtopic").forEach(s=>s.style.display="block");
+ })
+});
+render();
+</script>
+</body>
+</html>
